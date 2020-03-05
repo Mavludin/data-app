@@ -23,8 +23,8 @@ class App extends React.Component {
     this.setState({recievedData: tempArray})
   }
 
-  changeMainData = (array) => {
-    this.setState({recievedData: array})
+  backToChoice = () => {
+    this.setState({showLoader: true, recievedData: []})
   }
 
   render(){
@@ -37,7 +37,7 @@ class App extends React.Component {
               render={(props)=>
                 <ChoicePage 
                   {...props} 
-                  showLoader={this.showLoader}
+                  showLoader1={this.showLoader1}
                   getDataFromBackEnd={this.getDataFromBackEnd}
                 />
               } 
@@ -49,9 +49,9 @@ class App extends React.Component {
                     {...props} 
                     recievedData={this.state.recievedData} 
                     showLoader = {this.state.showLoader}
-                    getFiltered = {this.getFiltered}
                     changeMainData = {this.changeMainData} 
                     addNewData={this.addNewData}
+                    backToChoice={this.backToChoice}
                   />
                 } 
             />

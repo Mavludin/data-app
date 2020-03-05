@@ -23,6 +23,7 @@ input:focus::placeholder, textarea:focus::placeholder {
 
 a {
   text-decoration: none;
+  color: black;
 }
 
 .blackBtn {

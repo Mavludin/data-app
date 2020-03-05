@@ -1,9 +1,49 @@
-.DataPage table {
-    border-collapse: collapse;
+.Container {
     max-width: 992px;
     width: 100%;
+    position: relative;
+    margin: 0 auto;
+}
+
+.BackToChoice {
+    position: absolute;
+    left: 0;
+    top: 62px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-evenly;
+    width: 95px;
+}
+
+.ResetFilter {
+    position: absolute;
+    right: 0;
+    top: 62px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-evenly;
+    
+    width: 190px;
+    border: 0;
+    background-color: unset;
+    font-size: 16px;
+}
+
+.ResetFilter img, .BackToChoice img {
+    width: 18px;
+}
+
+.DataPage table {
+    border-collapse: collapse;
+
+    width: 100%;
+
     font-size: 14px;
     margin: 20px auto;
+
+    position: relative;
 }
 
 .DataPage td, th {

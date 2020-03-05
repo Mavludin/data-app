@@ -1,5 +1,6 @@
 import React from 'react';
 import classes from './DataPage.module.css';
+
 import Preloader from '../../components/Preloader/Preloader';
 import Pagination from '../../components/Pagination/Pagination';
 import FilterForm from '../../components/FilterForm/FilterForm';
@@ -8,11 +9,15 @@ import SelectedInfo from '../../components/SelectedInfo/SelectedInfo';
 
 import sortDownIcon from '../../img/sort-down.svg';
 import sortUpIcon from '../../img/sort-up.svg';
+import goBackIcon from '../../img/go-back.svg';
+import resetIcon from '../../img/reset-icon.svg';
 
 import isObjEmpty from '../../utils/CheckObject';
 import dynamicSort from '../../utils/DynamicSort';
 
 import Scroll from 'react-scroll';
+
+import { Link } from 'react-router-dom';
 
 class DataPage extends React.Component {
 
@@ -24,9 +29,11 @@ class DataPage extends React.Component {
         typesOfSort: [],
         currentPage: 1,
         selectedInfo: {},
-        filteringData : [],
+        tempFilteredData: [],
+        finalFilteredData : [],
         dataPerPage: 50,
-        isFiltered: false,
+        isTempFiltered: false,
+        isFinallyFiltered: false
     }
 
     sortTable = (pos, item, e) => {
@@ -62,23 +69,23 @@ class DataPage extends React.Component {
         if (this.state.currentPage !== 1) this.paginate(1);
 
         if (string.length) {
-            const filteredArray = this.props.recievedData.filter(item => {
+            const tempArray = this.props.recievedData.filter(item => {
                 for (let key in item) {
                     if (item[key].toString().toLowerCase().includes(string.toLowerCase())) {
                         return item;
                     }
                 }
             });
-            this.setState({filteringData: filteredArray, isFiltered: true});
-        } else this.setState({isFiltered: false});
+            this.setState({tempFilteredData: tempArray, isTempFiltered: true});
+        } else this.setState({isTempFiltered: false});
     }
 
     getFiltered = (e) => {
-        if (this.state.isFiltered) {
-            const tempArray = this.state.filteringData;
+        if (this.state.isTempFiltered) {
+            const tempArray = this.state.tempFilteredData;
             this.props.changeMainData(tempArray);
             e.currentTarget.previousSibling.value = '';
-            this.setState({isFiltered: false});
+            this.setState({isTempFiltered: false});
         }
     }
 
@@ -92,14 +99,31 @@ class DataPage extends React.Component {
         this.popUp.current.style.display = 'none';
     }
 
+    getFinallyFiltered = () => {
+        this.setState({
+            finalFilteredData: this.state.tempFilteredData, 
+            isFinallyFiltered: true,
+            isTempFiltered: false
+        })
+    }
+
+    resetFilter = () => {
+        this.setState({isFinallyFiltered: false})
+    }
+
     scrollToSelectedInfoBlock = () => {
         setTimeout(()=> {
             Scroll.animateScroll.scrollTo(parseInt(this.selectedInfoBlock.current.offsetTop))
         }, 200);
     }
 
-    render() {
+    componentDidMount () {
+        window.addEventListener('popstate', () => {
+            this.props.backToChoice();
+        });
+    }
 
+    render() {
         const tableHeaderCells = [];
         for (let key in this.props.recievedData[0]) {
 
@@ -124,8 +148,10 @@ class DataPage extends React.Component {
         const indexOfLastItem = this.state.currentPage * this.state.dataPerPage;
         const indexOfFirstItem = indexOfLastItem - this.state.dataPerPage;
         let currentData = [];
-        if (this.state.isFiltered) {
-            currentData = this.state.filteringData.slice(indexOfFirstItem, indexOfLastItem);
+        if (this.state.isTempFiltered) {
+            currentData = this.state.tempFilteredData.slice(indexOfFirstItem, indexOfLastItem);
+        } else if (this.state.isFinallyFiltered) {
+            currentData = this.state.finalFilteredData.slice(indexOfFirstItem, indexOfLastItem);
         } else {
             currentData = this.props.recievedData.slice(indexOfFirstItem, indexOfLastItem);
         }
@@ -145,52 +171,74 @@ class DataPage extends React.Component {
         return (
             <Preloader visible={this.props.showLoader}>
                 <div className={classes.DataPage}>
+                    <div className={classes.Container}>
                     
-                    { 
-                        this.state.isFiltered ?
-                            <h1>Результаты поиска:</h1>
-                        : <h1>Данные</h1>
-                    }
+                        { 
+                            this.state.isTempFiltered ?
+                                <h1>Результаты поиска:</h1>
+                            : <h1>Данные</h1>
+                        }
 
-                    <FilterForm getFiltered={this.getFiltered} filterData={this.filterData} />
+                        <Link to="/" 
+                            onClick={this.props.backToChoice}
+                            className={classes.BackToChoice}>
+                            <img src={goBackIcon} alt="go back Icon"/> <span>Назад</span>
+                        </Link>
 
-                    <button className="blackBtn" onClick={this.showPopUp}>Добавить</button>
+                        <FilterForm getFinallyFiltered={this.getFinallyFiltered} getFiltered={this.getFiltered} filterData={this.filterData} />
 
-                    <table>
-                        <thead>
-                            <tr>
-                                {renderingTableHeaderCells}
-                            </tr>
-                        </thead>
-                        <tbody>
-                                {renderingData}
-                        </tbody>
-                    </table>
+                        <button className="blackBtn" onClick={this.showPopUp}>Добавить</button>
 
-                    {
-                        (!this.state.isFiltered && (this.props.recievedData.length > this.state.dataPerPage) ) || 
-                            (this.state.isFiltered && (this.state.filteringData.length > this.state.dataPerPage) )  
-                            ?
-                            <Pagination 
-                                dataPerPage={this.state.dataPerPage} 
-                                totalData={
-                                    this.state.isFiltered ?
-                                    this.state.filteringData.length
-                                    : this.props.recievedData.length
-                                } 
-                                paginate={this.paginate}
+                        {
+                            this.state.isFinallyFiltered ?
+                                <button onClick={this.resetFilter} className={classes.ResetFilter}>
+                                    <span>Сбросить фильтр</span>
+                                    <img src={resetIcon} alt="reset Icon"/>
+                                </button>
+                            : null
+                        }
+
+                        <table>
+                            <thead>
+                                <tr>
+                                    {renderingTableHeaderCells}
+                                </tr>
+                            </thead>
+                            <tbody>
+                                    {renderingData}
+                            </tbody>
+                        </table>
+
+                        {
+                            (!this.state.isTempFiltered && (this.props.recievedData.length > this.state.dataPerPage) ) || 
+                                (this.state.isTempFiltered && (this.state.tempFilteredData.length > this.state.dataPerPage) )  
+                                ?
+                                <Pagination 
+                                    dataPerPage={this.state.dataPerPage} 
+                                    totalData={
+                                        this.state.isTempFiltered ?
+                                        this.state.tempFilteredData.length
+                                        : 
+                                            (
+                                                this.state.isFinallyFiltered ? 
+                                                this.state.finalFilteredData.length
+                                                 : this.props.recievedData.length
+                                            )
+                                    } 
+                                    paginate={this.paginate}
+                                />
+                            : null
+                        }
+
+                        { 
+                            isObjEmpty(this.state.selectedInfo) ? null
+                            : 
+                            <SelectedInfo 
+                                selectedInfo={this.state.selectedInfo} 
+                                selectedInfoBlock={this.selectedInfoBlock} 
                             />
-                        : null
-                    }
-
-                    { 
-                        isObjEmpty(this.state.selectedInfo) ? null
-                        : 
-                        <SelectedInfo 
-                            selectedInfo={this.state.selectedInfo} 
-                            selectedInfoBlock={this.selectedInfoBlock} 
-                        />
-                    }
+                        }
+                    </div>
                 </div>
 
                 <div onClick={this.closePopUp} ref={this.overlay} className={classes.OverLay}></div>
