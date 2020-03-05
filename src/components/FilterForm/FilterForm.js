@@ -3,7 +3,7 @@ import classes from './FilterForm.module.css';
 
 import searchIcon from '../../img/search-icon.svg';
 
-const Filter = ( { filterData, getFiltered, getFinallyFiltered }) => {
+const Filter = ( { filterData, getFinallyFiltered }) => {
 
     return (
         <form className={classes.FilterForm} action="/">

@@ -37,7 +37,6 @@ class App extends React.Component {
               render={(props)=>
                 <ChoicePage 
                   {...props} 
-                  showLoader1={this.showLoader1}
                   getDataFromBackEnd={this.getDataFromBackEnd}
                 />
               } 
@@ -49,7 +48,6 @@ class App extends React.Component {
                     {...props} 
                     recievedData={this.state.recievedData} 
                     showLoader = {this.state.showLoader}
-                    changeMainData = {this.changeMainData} 
                     addNewData={this.addNewData}
                     backToChoice={this.backToChoice}
                   />

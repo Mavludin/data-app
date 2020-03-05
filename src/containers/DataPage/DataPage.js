@@ -70,6 +70,7 @@ class DataPage extends React.Component {
 
         if (string.length) {
             const tempArray = this.props.recievedData.filter(item => {
+                item = Object.entries(item).slice(0,5);
                 for (let key in item) {
                     if (item[key].toString().toLowerCase().includes(string.toLowerCase())) {
                         return item;
@@ -78,15 +79,6 @@ class DataPage extends React.Component {
             });
             this.setState({tempFilteredData: tempArray, isTempFiltered: true});
         } else this.setState({isTempFiltered: false});
-    }
-
-    getFiltered = (e) => {
-        if (this.state.isTempFiltered) {
-            const tempArray = this.state.tempFilteredData;
-            this.props.changeMainData(tempArray);
-            e.currentTarget.previousSibling.value = '';
-            this.setState({isTempFiltered: false});
-        }
     }
 
     showPopUp = () => {
